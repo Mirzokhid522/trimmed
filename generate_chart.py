@@ -2,12 +2,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 # 1. Load your data
-# We use skipinitialspace=True to handle spaces after commas
 df = pd.read_csv('Australia CPI.csv', index_col=0, skipinitialspace=True)
-
-# --- DEBUGGING LINE ---
-print("Detected column headers:", df.columns.tolist())
-# ----------------------
 
 # 2. Define the Dark Theme Aesthetics
 bg_black = '#000000'
@@ -17,17 +12,16 @@ grid_dark = '#333333'
 fig = go.Figure()
 
 # 3. Add traces
-# We use the columns detected by the print statement above
 fig.add_trace(go.Bar(
     x=df.index, 
-    y=df.iloc[:, 0], # Using iloc ensures we grab the first column regardless of its name
+    y=df.iloc[:, 0],
     name='Change from previous month',
     marker_color='#1f77b4'
 ))
 
 fig.add_trace(go.Scatter(
     x=df.index, 
-    y=df.iloc[:, 1], # Using iloc ensures we grab the second column regardless of its name
+    y=df.iloc[:, 1], 
     name='Annual change', 
     mode='lines+markers',
     line=dict(width=3, color='#aec7e8')
@@ -44,6 +38,16 @@ fig.update_layout(
     margin=dict(l=40, r=40, t=80, b=40)
 )
 
-# 5. Export for Notion
-fig.write_html("index.html")
-print("Chart generated successfully as index.html")
+# 5. Export for Notion with full-page black background
+html_content = fig.to_html(full_html=True, include_plotlyjs='cdn')
+
+# Inject CSS to make the entire browser background black
+full_html = html_content.replace(
+    '<body', 
+    '<body style="background-color: #000000; margin: 0; padding: 0;"'
+)
+
+with open("index.html", "w") as f:
+    f.write(full_html)
+
+print("Chart generated successfully as index.html with black page background")
